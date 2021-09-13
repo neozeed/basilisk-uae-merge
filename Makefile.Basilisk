@@ -145,8 +145,8 @@ touch:
 cpustbl.o: cputbl.h
 cputbl.o: cputbl.h
 
-build68k.o: include/readcpu.h
-readcpu.o: include/readcpu.h
+build68k.o: readcpu.h
+readcpu.o: readcpu.h
 
 newcpu.o: include/config.h
 debug.o: include/config.h
