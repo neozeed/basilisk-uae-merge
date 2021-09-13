@@ -15,7 +15,7 @@ CPUOBJS		= cpu0.o cpu1.o cpu2.o cpu3.o cpu4.o cpu5.o cpu6.o cpu7.o cpu8.o cpu9.o
 
 .SUFFIXES: .o .c .h .m .i
 
-INCLUDES	= -I. -Iinclude -Ibasilisk
+INCLUDES	= -I. -Iinclude -Ibasilisk/include
 
 OBJS = basilisk/main.o newcpu.o basilisk/memory.o basilisk/via.o \
        basilisk/patches.o basilisk/sony.o basilisk/filedisk.o zfile.o \
@@ -145,8 +145,8 @@ touch:
 cpustbl.o: cputbl.h
 cputbl.o: cputbl.h
 
-build68k.o: readcpu.h
-readcpu.o: readcpu.h
+build68k.o: include/readcpu.h
+readcpu.o: include/readcpu.h
 
 newcpu.o: include/config.h
 debug.o: include/config.h

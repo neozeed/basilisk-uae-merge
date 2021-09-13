@@ -20,7 +20,7 @@
 #include "memory.h"
 #include "custom.h"
 #else
-#include "basilisk/memory.h"
+#include "basilisk/include/memory.h"
 #endif
 #include "readcpu.h"
 #include "newcpu.h"

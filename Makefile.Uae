@@ -39,7 +39,7 @@ sysconfdir      = ${prefix}/etc
 #AFLDFLAGS=-L/usr/local/vol/AudioFile/lib -lAF
 
 #INCLUDES=-I../src/include/ -I../src/
-INCLUDES=-Iinclude -I.
+INCLUDES=-Iuae/include -Iinclude  -I.
 
 OBJS = uae/main.o newcpu.o uae/memory.o uae/custom.o uae/cia.o uae/serial.o uae/disk.o uae/blitter.o uae/os.o \
        uae/autoconf.o uae/ersatz.o uae/filesys.o uae/hardfile.o uae/keybuf.o uae/expansion.o zfile.o \
@@ -369,13 +369,13 @@ touch:
 cpustbl.o: cputbl.h
 cputbl.o: cputbl.h
 
-build68k.o: readcpu.h
-readcpu.o: readcpu.h
+build68k.o: include/readcpu.h
+readcpu.o: include/readcpu.h
 
 uae/main.o:
-cia.o: include/events.h
-custom.o: include/events.h
-newcpu.o: include/events.h
+cia.o: uae/include/events.h
+custom.o: uae/include/events.h
+newcpu.o: uae/include/events.h
 autoconf.o:
 expansion.o:
 xwin.o:
@@ -388,6 +388,6 @@ fpp.o:
 ersatz.o:
 filesys.o:
 execlib.o:
-disk.o: include/events.h
-uae/blitter.o: include/events.h blit.h
+disk.o: uae/include/events.h
+uae/blitter.o: uae/include/events.h blit.h
 
