@@ -14,7 +14,7 @@ CFLAGS    = -O2 -DGCCCONSTFUNC="__attribute__((const))" -DREGPARAM="" -D__inline
 X_CFLAGS  =  -DX_DISPLAY_MISSING -DFORMS_H_VARIANT=1
 TARGET    = uae
 LIBRARIES =  
-GFXOBJS   = basilisk/xsdl.o
+GFXOBJS   = uae/xsdl.o
 ASMOBJS   = 
 CPUOBJS   = cpu0.o cpu1.o cpu2.o cpu3.o cpu4.o cpu5.o cpu6.o cpu7.o cpu8.o cpu9.o cpuA.o cpuB.o cpuC.o cpuD.o cpuE.o cpuF.o
 CPUOBJS1  = cpu_d0.o cpu_d1.o cpu_d2.o cpu_d3.o cpu_d4.o cpu_d5.o cpu_d6.o cpu_d7.o cpu_d8.o cpu_d9.o cpu_dA.o cpu_dB.o cpu_dC.o cpu_dD.o cpu_dE.o cpu_dF.o
@@ -76,7 +76,7 @@ clean:
 	-rm -f gencpu.exe genblitter.exe build68k.exe cpudefs.c cpuopti
 	-rm -f cpu?.c blit.h
 	-rm -f cputbl.h cpustbl.c cpu_f?.s cpu_f_d?.s
-	-rm -f blitfunc.c blitfunc.h blittable.c config.h
+	-rm -f blitfunc.c blitfunc.h blittable.c
 
 halfclean:
 	-rm -f $(OBJS)
@@ -95,55 +95,55 @@ blittable.c: genblitter.exe blitfunc.h
 
 genblitter.exe: uae/genblitter.o uae/blitops.o
 	$(CC) $(LDFLAGS) -o genblitter uae/genblitter.o uae/blitops.o
-build68k: build68k.o
+build68k.exe: build68k.o
 	$(CC) $(LDFLAGS) -o build68k build68k.o
 cpuopti: cpuopti.o
 	$(CC) $(LDFLAGS) -o cpuopti cpuopti.o
-gencpu: gencpu.o readcpu.o cpudefs.o
+gencpu.exe: gencpu.o readcpu.o cpudefs.o
 	$(CC) $(LDFLAGS) -o gencpu gencpu.o readcpu.o cpudefs.o
 
 custom.o: blit.h
 
-cpudefs.c: build68k table68k
+cpudefs.c: build68k.exe table68k
 	./build68k >cpudefs.c
-cpustbl.c: gencpu
+cpustbl.c: gencpu.exe
 	./gencpu s >cpustbl.c
-cputbl.c: gencpu
+cputbl.c: gencpu.exe
 	./gencpu t >cputbl.c
-cputbl.h: gencpu
+cputbl.h: gencpu.exe
 	./gencpu h >cputbl.h
 
-cpu0.c: gencpu
+cpu0.c: gencpu.exe
 	./gencpu f 0 >cpu0.c
-cpu1.c: gencpu
+cpu1.c: gencpu.exe
 	./gencpu f 1 >cpu1.c
-cpu2.c: gencpu
+cpu2.c: gencpu.exe
 	./gencpu f 2 >cpu2.c
-cpu3.c: gencpu
+cpu3.c: gencpu.exe
 	./gencpu f 3 >cpu3.c
-cpu4.c: gencpu
+cpu4.c: gencpu.exe
 	./gencpu f 4 >cpu4.c
-cpu5.c: gencpu
+cpu5.c: gencpu.exe
 	./gencpu f 5 >cpu5.c
-cpu6.c: gencpu
+cpu6.c: gencpu.exe
 	./gencpu f 6 >cpu6.c
-cpu7.c: gencpu
+cpu7.c: gencpu.exe
 	./gencpu f 7 >cpu7.c
-cpu8.c: gencpu
+cpu8.c: gencpu.exe
 	./gencpu f 8 >cpu8.c
-cpu9.c: gencpu
+cpu9.c: gencpu.exe
 	./gencpu f 9 >cpu9.c
-cpuA.c: gencpu
+cpuA.c: gencpu.exe
 	./gencpu f 10 >cpuA.c
-cpuB.c: gencpu
+cpuB.c: gencpu.exe
 	./gencpu f 11 >cpuB.c
-cpuC.c: gencpu
+cpuC.c: gencpu.exe
 	./gencpu f 12 >cpuC.c
-cpuD.c: gencpu
+cpuD.c: gencpu.exe
 	./gencpu f 13 >cpuD.c
-cpuE.c: gencpu
+cpuE.c: gencpu.exe
 	./gencpu f 14 >cpuE.c
-cpuF.c: gencpu
+cpuF.c: gencpu.exe
 	./gencpu f 15 >cpuF.c
 
 cpu0.o: cpu0.c cputbl.h
@@ -372,25 +372,22 @@ cputbl.o: cputbl.h
 build68k.o: include/readcpu.h
 readcpu.o: include/readcpu.h
 
-uae/main.o: config.h
-cia.o: config.h include/events.h
-custom.o: config.h include/events.h
-newcpu.o: config.h include/events.h
-autoconf.o: config.h
-expansion.o: config.h
-xwin.o: config.h
-svga.o: config.h
-bebox.o: config.h
-os.o: config.h
-uae/memory.o: config.h
-debug.o: config.h
-fpp.o: config.h
-ersatz.o: config.h
-filesys.o: config.h
-execlib.o: config.h
-disk.o: config.h include/events.h
-uae/blitter.o: config.h include/events.h blit.h
-
-config.h: ../config.h
-	ln -s ../config.h config.h
+uae/main.o:
+cia.o: include/events.h
+custom.o: include/events.h
+newcpu.o: include/events.h
+autoconf.o:
+expansion.o:
+xwin.o:
+svga.o:
+bebox.o:
+os.o:
+uae/memory.o:
+debug.o:
+fpp.o:
+ersatz.o:
+filesys.o:
+execlib.o:
+disk.o: include/events.h
+uae/blitter.o: include/events.h blit.h
 

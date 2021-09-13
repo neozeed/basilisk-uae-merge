@@ -21,7 +21,7 @@
 #include "newcpu.h"
 #include "disk.h"
 #include "debug.h"
-#include "xwin.h"
+//#include "xwin.h"
 #include "os.h"
 #include "keybuf.h"
 #include "gui.h"
