@@ -1,0 +1,396 @@
+# Generated automatically from Makefile.in by configure.
+#
+# Makefile.in for UAE
+#
+
+
+CC        = gcc
+CPP       = gcc -E
+LDFLAGS   = -lSDL -lwinmm -lgdi32  -static-libgcc
+#CFLAGS    = -O3 -fomit-frame-pointer -Wall -Wtraditional -Wno-unused -Wno-format -W -Wmissing-prototypes -Wstrict-prototypes -DGCCCONSTFUNC="__attribute__((const))" -fno-strength-reduce -DINTEL_FLAG_OPT=1 -DREGPARAM="__attribute__((regparm(3)))" -D__inline__=inline -DSTATFS_NO_ARGS= -DSTATBUF_BAVAIL= -DBROKEN_JOYSTICK_H= $(AFINCLUDE)
+# 295 CFLAGS    = -O0 -DGCCCONSTFUNC="__attribute__((const))" -DREGPARAM="__attribute__((regparm(3)))" -D__inline__=inline -DSTATFS_NO_ARGS= -DSTATBUF_BAVAIL= -DBROKEN_JOYSTICK_H= $(AFINCLUDE)
+#CFLAGS    = -O0 -DGCCCONSTFUNC="__attribute__((const))" -DREGPARAM="" -D__inline__=inline -DSTATFS_NO_ARGS= -DSTATBUF_BAVAIL= -DBROKEN_JOYSTICK_H= $(AFINCLUDE)
+CFLAGS    = -O2 -DGCCCONSTFUNC="__attribute__((const))" -DREGPARAM="" -D__inline__=inline -DSTATFS_NO_ARGS= -DSTATBUF_BAVAIL= -DBROKEN_JOYSTICK_H= $(AFINCLUDE)
+X_CFLAGS  =  -DX_DISPLAY_MISSING -DFORMS_H_VARIANT=1
+TARGET    = uae
+LIBRARIES =  
+GFXOBJS   = basilisk/xsdl.o
+ASMOBJS   = 
+CPUOBJS   = cpu0.o cpu1.o cpu2.o cpu3.o cpu4.o cpu5.o cpu6.o cpu7.o cpu8.o cpu9.o cpuA.o cpuB.o cpuC.o cpuD.o cpuE.o cpuF.o
+CPUOBJS1  = cpu_d0.o cpu_d1.o cpu_d2.o cpu_d3.o cpu_d4.o cpu_d5.o cpu_d6.o cpu_d7.o cpu_d8.o cpu_d9.o cpu_dA.o cpu_dB.o cpu_dC.o cpu_dD.o cpu_dE.o cpu_dF.o
+DEBUGOBJS = debug.o
+MATHLIB   = -lm
+
+INSTALL         = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA    = @INSTALL_DATA@
+prefix          = /usr/local
+exec_prefix     = ${prefix}
+bindir          = ${exec_prefix}/bin
+libdir          = ${exec_prefix}/lib
+sysconfdir      = ${prefix}/etc
+
+.SUFFIXES: .o .c .h .m .i
+
+# If you want to use the AF System to play sound, set theese to the
+# correct paths. If not, leave them commented out.
+# (Don't forget to define AF_SOUND in config.h)
+#AFINCLUDE=-I/usr/local/vol/AudioFile/include
+#AFLDFLAGS=-L/usr/local/vol/AudioFile/lib -lAF
+
+#INCLUDES=-I../src/include/ -I../src/
+INCLUDES=-Iinclude -I.
+
+OBJS = uae/main.o newcpu.o uae/memory.o uae/custom.o uae/cia.o uae/serial.o uae/disk.o uae/blitter.o uae/os.o \
+       uae/autoconf.o uae/ersatz.o uae/filesys.o uae/hardfile.o uae/keybuf.o uae/expansion.o zfile.o \
+       fpp.o readcpu.o cpudefs.o uae/gfxutil.o uae/gfxlib.o blitfunc.o blittable.o \
+       compiler.o uae/uaelib.o uae/execlib.o uae/timerdev.o machdep/support.o cpustbl.o \
+       $(ASMOBJS) $(CPUOBJS) $(CPUOBJS1) $(GFXOBJS) $(DEBUGOBJS) cpustbl_d.o
+
+all: $(TARGET)
+
+x11: progs
+
+svgalib: progs
+
+amigaos: progs
+
+be: progs
+
+next: progs
+	cp uae ../Uae.app/Uae
+
+progs: uae readdisk
+
+install:
+
+readdisk: readdisk.o
+	$(CC) readdisk.o -o readdisk $(LDFLAGS) $(DEBUGFLAGS)
+
+uae: $(OBJS)
+	$(CC) $(OBJS) -o uae $(GFXLDFLAGS) $(AFLDFLAGS) $(LDFLAGS) $(DEBUGFLAGS) $(LIBRARIES) $(MATHLIB)
+
+clean:
+	-rm -f $(OBJS) *.o uae.exe readdisk.exe
+	-rm -f uae/*.o
+	-rm -f gencpu.exe genblitter.exe build68k.exe cpudefs.c cpuopti
+	-rm -f cpu?.c blit.h
+	-rm -f cputbl.h cpustbl.c cpu_f?.s cpu_f_d?.s
+	-rm -f blitfunc.c blitfunc.h blittable.c config.h
+
+halfclean:
+	-rm -f $(OBJS)
+
+streifenfrei: clean
+	-rm -f Makefile config.cache config.log config.status include/sysconfig.h machdep
+
+blit.h: genblitter.exe
+	./genblitter i >blit.h
+blitfunc.c: genblitter.exe blitfunc.h
+	./genblitter f >blitfunc.c
+blitfunc.h: genblitter.exe
+	./genblitter h >blitfunc.h
+blittable.c: genblitter.exe blitfunc.h
+	./genblitter t >blittable.c
+
+genblitter.exe: uae/genblitter.o uae/blitops.o
+	$(CC) $(LDFLAGS) -o genblitter uae/genblitter.o uae/blitops.o
+build68k: build68k.o
+	$(CC) $(LDFLAGS) -o build68k build68k.o
+cpuopti: cpuopti.o
+	$(CC) $(LDFLAGS) -o cpuopti cpuopti.o
+gencpu: gencpu.o readcpu.o cpudefs.o
+	$(CC) $(LDFLAGS) -o gencpu gencpu.o readcpu.o cpudefs.o
+
+custom.o: blit.h
+
+cpudefs.c: build68k table68k
+	./build68k >cpudefs.c
+cpustbl.c: gencpu
+	./gencpu s >cpustbl.c
+cputbl.c: gencpu
+	./gencpu t >cputbl.c
+cputbl.h: gencpu
+	./gencpu h >cputbl.h
+
+cpu0.c: gencpu
+	./gencpu f 0 >cpu0.c
+cpu1.c: gencpu
+	./gencpu f 1 >cpu1.c
+cpu2.c: gencpu
+	./gencpu f 2 >cpu2.c
+cpu3.c: gencpu
+	./gencpu f 3 >cpu3.c
+cpu4.c: gencpu
+	./gencpu f 4 >cpu4.c
+cpu5.c: gencpu
+	./gencpu f 5 >cpu5.c
+cpu6.c: gencpu
+	./gencpu f 6 >cpu6.c
+cpu7.c: gencpu
+	./gencpu f 7 >cpu7.c
+cpu8.c: gencpu
+	./gencpu f 8 >cpu8.c
+cpu9.c: gencpu
+	./gencpu f 9 >cpu9.c
+cpuA.c: gencpu
+	./gencpu f 10 >cpuA.c
+cpuB.c: gencpu
+	./gencpu f 11 >cpuB.c
+cpuC.c: gencpu
+	./gencpu f 12 >cpuC.c
+cpuD.c: gencpu
+	./gencpu f 13 >cpuD.c
+cpuE.c: gencpu
+	./gencpu f 14 >cpuE.c
+cpuF.c: gencpu
+	./gencpu f 15 >cpuF.c
+
+cpu0.o: cpu0.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu1.o: cpu1.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu2.o: cpu2.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu3.o: cpu3.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu4.o: cpu4.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu5.o: cpu5.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu6.o: cpu6.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu7.o: cpu7.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu8.o: cpu8.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpu9.o: cpu9.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpuA.o: cpuA.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpuB.o: cpuB.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpuC.o: cpuC.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpuD.o: cpuD.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpuE.o: cpuE.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+cpuF.o: cpuF.c cputbl.h
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+       
+cpu_d0.o: cpu0.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu0.c -o $@
+cpu_d1.o: cpu1.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu1.c -o $@
+cpu_d2.o: cpu2.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu2.c -o $@
+cpu_d3.o: cpu3.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu3.c -o $@
+cpu_d4.o: cpu4.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu4.c -o $@
+cpu_d5.o: cpu5.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu5.c -o $@
+cpu_d6.o: cpu6.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu6.c -o $@
+cpu_d7.o: cpu7.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu7.c -o $@
+cpu_d8.o: cpu8.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu8.c -o $@
+cpu_d9.o: cpu9.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpu9.c -o $@
+cpu_dA.o: cpuA.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpuA.c -o $@
+cpu_dB.o: cpuB.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpuB.c -o $@
+cpu_dC.o: cpuC.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpuC.c -o $@
+cpu_dD.o: cpuD.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpuD.c -o $@
+cpu_dE.o: cpuE.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpuE.c -o $@
+cpu_dF.o: cpuF.c cputbl.h
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpuF.c -o $@
+       
+cpu_f0.s: cpu0.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f1.s: cpu1.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f2.s: cpu2.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f3.s: cpu3.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f4.s: cpu4.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f5.s: cpu5.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f6.s: cpu6.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f7.s: cpu7.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f8.s: cpu8.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f9.s: cpu9.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_fA.s: cpuA.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_fB.s: cpuB.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_fC.s: cpuC.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_fD.s: cpuD.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_fE.s: cpuE.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_fF.s: cpuF.c cputbl.h cpuopti
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+
+cpu_f_d0.s: cpu0.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d1.s: cpu1.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d2.s: cpu2.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d3.s: cpu3.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d4.s: cpu4.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d5.s: cpu5.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d6.s: cpu6.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d7.s: cpu7.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d8.s: cpu8.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_d9.s: cpu9.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_dA.s: cpuA.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_dB.s: cpuB.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_dC.s: cpuC.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_dD.s: cpuD.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_dE.s: cpuE.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED  $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+cpu_f_dF.s: cpuF.c cputbl.h cpuopti
+	$(CC) -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $< -o cpu-tmp.s
+	./cpuopti <cpu-tmp.s >$@
+	rm cpu-tmp.s
+	
+cpustbl_d.o: cpustbl.c cputbl.h
+	$(CC) -c -DMEMFUNCS_DIRECT_REQUESTED $(INCLUDES) $(INCDIRS) $(CFLAGS) $(X_CFLAGS) cpustbl.c -o $@
+
+bebox.o: bebox.cpp
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $(DEBUGFLAGS) bebox.cpp
+
+.m.o:
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $(DEBUGFLAGS) $*.m
+.c.o:
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $(DEBUGFLAGS) $*.c -o $@
+.c.s:
+	$(CC) $(INCLUDES) -S $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c
+.c.i:
+	$(CC) $(INCLUDES) -E $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $*.c > $@
+.S.o:
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $(DEBUGFLAGS) $*.S
+.s.o:
+	$(CC) $(INCLUDES) -c $(INCDIRS) $(CFLAGS) $(X_CFLAGS) $(DEBUGFLAGS) $*.s
+
+# Saves recompiling...
+touch:
+	touch *.o; touch build68k; touch cpudefs.c; touch cpudefs.o; touch gencpu; touch cpu?.c cpu*tbl.[ch]; touch cpuopti.o cpuopti cpu?.o cpu_f?.s cpu_f?.o cpu_f_d?.s cpu_f_d?.o cpu*tbl.o cpustbl_d.o
+
+# Some more dependencies...
+cpustbl.o: cputbl.h
+cputbl.o: cputbl.h
+
+build68k.o: include/readcpu.h
+readcpu.o: include/readcpu.h
+
+uae/main.o: config.h
+cia.o: config.h include/events.h
+custom.o: config.h include/events.h
+newcpu.o: config.h include/events.h
+autoconf.o: config.h
+expansion.o: config.h
+xwin.o: config.h
+svga.o: config.h
+bebox.o: config.h
+os.o: config.h
+uae/memory.o: config.h
+debug.o: config.h
+fpp.o: config.h
+ersatz.o: config.h
+filesys.o: config.h
+execlib.o: config.h
+disk.o: config.h include/events.h
+uae/blitter.o: config.h include/events.h blit.h
+
+config.h: ../config.h
+	ln -s ../config.h config.h
+

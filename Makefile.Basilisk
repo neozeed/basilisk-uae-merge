@@ -1,0 +1,162 @@
+# Makefile for Basilisk
+#
+# Copyright 1995,1996 Bernd Schmidt
+# Copyright 1996 Ed Hanway
+# Copyright 1996,1997 Christian Bauer
+
+CC		= gcc
+CPP		= gcc -E
+#CFLAGS		= -O2 -DUSE_ZFILE -DBASILISK -DSPCFLAG_STOP=2 -DSPCFLAG_INT=8 -DREGPARAM=""
+CFLAGS		= -O2 -DUSE_ZFILE -DBASILISK -DREGPARAM=""
+LDFLAGS		= -lSDL -lwinmm -lgdi32 -lm -static-libgcc
+GFXOBJS		= basilisk/sys_null.o
+ASMOBJS		=
+CPUOBJS		= cpu0.o cpu1.o cpu2.o cpu3.o cpu4.o cpu5.o cpu6.o cpu7.o cpu8.o cpu9.o cpuA.o cpuB.o cpuC.o cpuD.o cpuE.o cpuF.o
+
+.SUFFIXES: .o .c .h .m .i
+
+INCLUDES	= -I. -Iinclude -Ibasilisk
+
+OBJS = basilisk/main.o newcpu.o basilisk/memory.o basilisk/via.o \
+       basilisk/patches.o basilisk/sony.o basilisk/filedisk.o zfile.o \
+       fpp.o readcpu.o cpudefs.o machdep/support.o cpustbl.o \
+       $(ASMOBJS) $(CPUOBJS) $(GFXOBJS) debug.o
+
+all: include/sysconfig.h Basilisk.exe
+
+#include/sysconfig.h: include/sysconfig.h.X
+#	cp include/sysconfig.h.X include/sysconfig.h
+
+Basilisk.exe: $(OBJS)
+	$(CC) $(OBJS) -o Basilisk.exe $(LDFLAGS)
+	cp Basilisk.exe ..
+
+clean:
+	-rm -f $(OBJS) *.o Basilisk.exe
+	-rm -f gencpu.exe build68k.exe cpudefs.c
+	-rm -f cpu?.c
+	-rm -f cputbl.h cpustbl.c
+	-rm -f basilisk/*.o
+
+halfclean:
+	-rm -f $(OBJS)
+
+build68k.exe: build68k.o
+	$(CC) $(LDFLAGS) -o build68k.exe build68k.o
+gencpu.exe: gencpu.o readcpu.o cpudefs.o
+	$(CC) $(LDFLAGS) -o gencpu.exe gencpu.o readcpu.o cpudefs.o
+
+cpudefs.c: build68k.exe table68k
+	./build68k.exe >cpudefs.c
+cpustbl.c: gencpu.exe
+	./gencpu.exe s >cpustbl.c
+cputbl.c: gencpu.exe
+	./gencpu.exe t >cputbl.c
+cputbl.h: gencpu.exe
+	./gencpu.exe h >cputbl.h
+
+cpu0.c: gencpu.exe
+	./gencpu.exe f 0 >cpu0.c
+cpu1.c: gencpu.exe
+	./gencpu.exe f 1 >cpu1.c
+cpu2.c: gencpu.exe
+	./gencpu.exe f 2 >cpu2.c
+cpu3.c: gencpu.exe
+	./gencpu.exe f 3 >cpu3.c
+cpu4.c: gencpu.exe
+	./gencpu.exe f 4 >cpu4.c
+cpu5.c: gencpu.exe
+	./gencpu.exe f 5 >cpu5.c
+cpu6.c: gencpu.exe
+	./gencpu.exe f 6 >cpu6.c
+cpu7.c: gencpu.exe
+	./gencpu.exe f 7 >cpu7.c
+cpu8.c: gencpu.exe
+	./gencpu.exe f 8 >cpu8.c
+cpu9.c: gencpu.exe
+	./gencpu.exe f 9 >cpu9.c
+cpuA.c: gencpu.exe
+	./gencpu.exe f 10 >cpuA.c
+cpuB.c: gencpu.exe
+	./gencpu.exe f 11 >cpuB.c
+cpuC.c: gencpu.exe
+	./gencpu.exe f 12 >cpuC.c
+cpuD.c: gencpu.exe
+	./gencpu.exe f 13 >cpuD.c
+cpuE.c: gencpu.exe
+	./gencpu.exe f 14 >cpuE.c
+cpuF.c: gencpu.exe
+	./gencpu.exe f 15 >cpuF.c
+
+cpu0.o: cpu0.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu1.o: cpu1.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu2.o: cpu2.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu3.o: cpu3.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu4.o: cpu4.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu5.o: cpu5.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu6.o: cpu6.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu7.o: cpu7.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu8.o: cpu8.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpu9.o: cpu9.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpuA.o: cpuA.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpuB.o: cpuB.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpuC.o: cpuC.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpuD.o: cpuD.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpuE.o: cpuE.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+cpuF.o: cpuF.c cputbl.h
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c
+
+basilisk/sys_beos.o: basilisk/sys_beos.cpp
+	$(CC) $(INCLUDES) -c $(CFLAGS) basilisk/sys_beos.cpp -o $@
+
+.m.o:
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.m
+.c.o:
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c -o $@
+.c.s:
+	$(CC) $(INCLUDES) -S $(CFLAGS) $*.c
+.c.i:
+	$(CC) $(INCLUDES) -E $(CFLAGS) $*.c > $@
+.S.o:
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.S
+.s.o:
+	$(CC) $(INCLUDES) -c $(CFLAGS) $*.s
+
+# Saves recompiling...
+touch:
+	touch *.o; touch build68k.exe; touch cpudefs.c; touch cpudefs.o; touch gencpu.exe; touch cpu?.c cpu*tbl.[ch]; touch cpuopti.o cpuopti cpu?.o cpu_f?.s cpu_f?.o cpu_f_d?.s cpu_f_d?.o cpu*tbl.o cpustbl_d.o
+
+# Some more dependencies...
+cpustbl.o: cputbl.h
+cputbl.o: cputbl.h
+
+build68k.o: include/readcpu.h
+readcpu.o: include/readcpu.h
+
+newcpu.o: include/config.h
+debug.o: include/config.h
+fpp.o: include/config.h
+basilisk/main.o: include/config.h
+basilisk/memory.o: include/config.h
+basilisk/patches.o: include/config.h
+basilisk/sony.o: include/config.h
+basilisk/filedisk.o: include/config.h
+basilisk/via.o: include/config.h
+
+basilisk/sys_beos.o: include/config.h
+basilisk/sys_x.o: include/config.h
