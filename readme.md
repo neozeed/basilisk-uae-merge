@@ -9,5 +9,8 @@ features from later versions.
 The upside being things like better 68030/68040 68881/68882
 and MMU emulation.
 
-This includes the bare minimum needed to build and run.
+But Qemu now includes a Quadra 800 emulator capable of 
+running A/UX, so it makes this detour kind of pointless.
+
+This includes the bare minimum source needed to build and run.
 You'll need to bring your own ROMS and OS.
